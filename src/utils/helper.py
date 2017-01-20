@@ -43,7 +43,7 @@ def save_failed_url(**kwargs):
         );'''
     )
     cur = conn.cursor()
-    cur.excute('insert (url, method, data, dtype, rex, selector, attr) into urls values (?, ?, ?, ?, ?, ?, ?)', (url, method, data, dtype, rex, selector, attr))
+    cur.excute('insert (url, method, data, rtype, rkey, dtype, rex, selector, attr) into urls values (?, ?, ?, ?, ?, ?, ?, ?, ?)', (url, method, data, rtype, rkey, dtype, rex, selector, attr))
     cur.commit()
     cur.close()
     conn.close()
