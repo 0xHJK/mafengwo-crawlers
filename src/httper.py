@@ -15,6 +15,10 @@ class Httper(object):
         self.url = args[0]
         self.method = kwargs.get('method', 'get')
         self.data = kwargs.get('data', {})
+        # rtype: response type, text or json
+        self.rtype = kwargs.get('rtype', 'text')
+        # rkey: response key
+        self.rkey = kwargs.get('rkey', '')
         # dtype: deal way, re or pq
         self.dtype = kwargs.get('dtype', '')
         self.rex = kwargs.get('rex', '')
@@ -29,6 +33,8 @@ class Httper(object):
             'url': self.url,
             'method': self.method,
             'data': str(self.data),
+            'rtype': self.rtype,
+            'rkey': self.rkey,
             'dtype': self.dtype,
             'rex': self.rex,
             'selector': self.selector,
@@ -64,7 +70,13 @@ class Httper(object):
             self.request_failed()
             return False, ''
         echo.success('Get %s successfully' % self.url)
-        return True, r.text
+        if self.rtype == 'text':
+            return True, r.text
+        elif self.rtype == 'json':
+            if self.rkey:
+                return True, r.json()[rkey]
+            else:
+                return True, r.json()
 
     '''get data'''
     def get_data(self):

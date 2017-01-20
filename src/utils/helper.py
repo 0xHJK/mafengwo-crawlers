@@ -34,6 +34,8 @@ def save_failed_url(**kwargs):
             url         text,
             method      text,
             data        text,
+            rtype       text,
+            rkey        text,
             dtype       text,
             rex         text,
             selector    text,
