@@ -12,7 +12,7 @@ class MainDestCtrl(object):
         super(MainDestCtrl, self).__init__()
         self.url = 'http://www.mafengwo.cn/mdd/'
 
-    def save_dest_list(self, dest_id_name):
+    def save_pvc_dest_list(self, dest_id_name):
         for dest in dest_id_name:
             md_id = re.findall('\d+', dest[0])
             print(dest)
@@ -24,6 +24,21 @@ class MainDestCtrl(object):
                     province = dest[1]
                 )
 
+    def save_city_dest_list(self, dest_id_name):
+        for dest in dest_id_name:
+            md_id = re.findall('\d+', dest[0])
+            print(dest)
+            if md_id:
+                dst = Dest.create(
+                    dest_id = uuid.uuid4(),
+                    name = dest[1],
+                    m_dest_id = md_id[0],
+                    city = dest[1]
+                )
+
+    def read_pvc_dest_list(self):
+        return Dest.select(Dest.dest_id, Dest.province, Dest.m_dest_id).where(Dest.province != '')
+
     def dest_list(self):
         hr = Httper(
             self.url,
@@ -34,19 +49,20 @@ class MainDestCtrl(object):
         )
         hr.request()
         # destination href
-        _, dest_href_b = hr.get_data()
+        _, dest_href_pvc = hr.get_data()
         # destination name
-        _, dest_name_b = hr.get_data(attr = 'text')
-        _, dest_href_a = hr.get_data(
+        _, dest_name_pvc = hr.get_data(attr = 'text')
+        _, dest_href_city = hr.get_data(
             selector = '.bd-china > dl:nth-child(1) > dd > ul li a',
             attr = 'href'
         )
-        _, dest_name_a = hr.get_data(
+        _, dest_name_city = hr.get_data(
             selector = '.bd-china > dl:nth-child(1) > dd > ul li a',
             attr = 'text'
         )
-        self.save_dest_list(zip(dest_href_a + dest_href_b, dest_name_a + dest_name_b))
-        
+        self.save_pvc_dest_list(zip(dest_href_pvc, dest_name_pvc))
+        self.save_city_dest_list(zip(dest_href_city, dest_name_city))
+
 
 class DestCtrl(object):
     """docstring for DestCtrl"""
