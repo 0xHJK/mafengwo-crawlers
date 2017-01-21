@@ -3,6 +3,7 @@
 
 import uuid
 import re
+from utils.pyecho import echo
 from models import Dest
 from httper import Httper
 
@@ -37,7 +38,8 @@ class MainDestCtrl(object):
                 )
 
     def read_pvc_dest_list(self):
-        return Dest.select(Dest.dest_id, Dest.province, Dest.m_dest_id).where(Dest.province != '')
+        # select province which has not completed
+        return Dest.select(Dest.dest_id, Dest.province, Dest.m_dest_id).where((Dest.province == Dest.name) & (Dest.is_dest_over == False))
 
     def dest_list(self):
         hr = Httper(
@@ -68,18 +70,18 @@ class DestCtrl(object):
     """docstring for DestCtrl"""
     def __init__(self, **kwargs):
         super(DestCtrl, self).__init__()
-        # mafengwo mddid
-        self.m_dest_id = kwargs.get('m_dest_id', '')
-        self.name = kwargs.get('name', '')
+        # mafengwo mddid, parent m_dest_id
+        self.mddid = kwargs.get('mddid', '')
+        self.province = kwargs.get('province', '')
         # dest uuid
-        self.dest_id = kwargs.get('dest_id', '')
-        self.page = 1
-        self.total = 2
+        self.parent_dest_id = kwargs.get('parent_dest_id', '')
+        self.page = kwargs.get('page', 1)
+        self.total = kwargs.get('total', 2)
         self.url = 'http://www.mafengwo.cn/mdd/base/list/pagedata_citylist'
 
     def base_dest_list(self):
         data = {
-            'mddid': self.m_dest_id,
+            'mddid': self.mddid,
             'page': self.page
         }
         hr = Httper(
@@ -95,11 +97,13 @@ class DestCtrl(object):
         # send request
         hr.request()
         # get total page count
-        _, self.total = hr.get_data(
-            rkey = 'page',
-            selector = '.pg-last',
-            attr = 'data-page'
-        )[0]
+        if self.page == 1:
+            _, tmp_total = hr.get_data(
+                rkey = 'page',
+                selector = '.pg-last',
+                attr = 'data-page'
+            )
+            self.total = int(tmp_total[0])
         # get destination list
         _, dest_id_list = hr.get_data()
         _, dest_name_list = hr.get_data(
@@ -110,17 +114,24 @@ class DestCtrl(object):
 
     def save_dest_list(self, dest_id_name):
         for dest in dest_id_name:
-            dst = Dest.create(
-                dest_id = uuid.uuid4(),
-                name = dest[1],
-                m_dest_id = dest[0],
-                province = self.dest_name,
-                parent_dest_id = self.dest_id
-            )
+            print('saving...', dest)
+            names = dest[1].split(' ')
+            if names[0]:
+                dst = Dest.create(
+                    dest_id = uuid.uuid4(),
+                    name = names[0],
+                    m_dest_id = dest[0],
+                    province = self.province,
+                    parent_dest_id = self.parent_dest_id
+                )
 
     def dest_list(self):
         while self.page <= self.total:
+            echo.info('mddid: %s, province: %s, uuid: %s, page: %s, total: %s' % (self.mddid, self.province, self.parent_dest_id, self.page, self.total))
             dest_id_name = self.base_dest_list()
             self.save_dest_list(dest_id_name)
             self.page += 1
+        # update complete judgement flag
+        dc = Dest(dest_id = self.parent_dest_id, name = self.province, province = self.province, m_dest_id = self.mddid, is_dest_over = True)
+        dc.save()
         
