@@ -18,6 +18,8 @@ class Dest(BaseModel):
     country = CharField(max_length = 48, default = '中国')
     parent_dest_id = UUIDField(default = '')
     m_dest_id = IntegerField(default = 0)
+    is_dest_over = BooleanField(default = False)
+    is_poi_over = BooleanField(default = False)
 
 
 class Poi(BaseModel):
