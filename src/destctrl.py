@@ -89,7 +89,7 @@ class DestCtrl(object):
             method = 'post',
             data = data,
             rtype = 'json',
-            rkey = 'list',
+            rkey = ['list'],
             dtype = 'pq',
             selector = '.item .img a',
             attr = 'data-id'
@@ -99,7 +99,7 @@ class DestCtrl(object):
         # get total page count
         if self.page == 1:
             _, tmp_total = hr.get_data(
-                rkey = 'page',
+                rkey = ['page'],
                 selector = '.pg-last',
                 attr = 'data-page'
             )

@@ -20,7 +20,7 @@ class Httper(object):
         # rtype: response type, text or json
         self.rtype = kwargs.get('rtype', 'text')
         # rkey: response key
-        self.rkey = kwargs.get('rkey', '')
+        self.rkey = kwargs.get('rkey', [''])
         # dtype: deal way, re or pq
         self.dtype = kwargs.get('dtype', '')
         self.rex = kwargs.get('rex', '')
@@ -41,7 +41,7 @@ class Httper(object):
                 method = self.method,
                 data = str(self.data),
                 rtype = self.rtype,
-                rkey = self.rkey,
+                rkey = str(self.rkey),
                 dtype = self.dtype,
                 rex = self.rex,
                 selector = self.selector,
@@ -92,8 +92,10 @@ class Httper(object):
         attr = kwargs.get('attr', self.attr)
         rkey = kwargs.get('rkey', self.rkey)
         _, txt = self.result
-        if rkey:
-            txt = txt[rkey]
+        # 支持多级json数据
+        for rk in rkey:
+            if rk:
+                txt = txt[rk]
         # 如果请求成功了
         if _:
             # 如果是用正则模式
