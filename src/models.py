@@ -16,7 +16,7 @@ class Dest(BaseModel):
     city = CharField(max_length = 48, default = '')
     province = CharField(max_length = 48, default = '')
     country = CharField(max_length = 48, default = '中国')
-    parent_dest_id = UUIDField(default = '')
+    parent_dest_id = CharField(max_length = 40, default = '')
     m_dest_id = IntegerField(default = 0)
     is_dest_over = BooleanField(default = False)
     is_poi_over = BooleanField(default = False)
@@ -38,14 +38,15 @@ class Poi(BaseModel):
     comment_count_a = IntegerField(default = 0)
     comment_count_b = IntegerField(default = 0)
     comment_count_c = IntegerField(default = 0)
-    parent_poi_id = UUIDField(default = '')
-    dest_id = UUIDField(default = '')
+    parent_poi_id = CharField(max_length = 40, default = '')
+    sub_poi_id = TextField(default = '')
+    dest_id = CharField(max_length = 40, default = '')
     m_poi_id = IntegerField(default = 0)
 
 
 class Pimg(BaseModel):
     idx_id = PrimaryKeyField(primary_key = True)
-    poi_id = UUIDField(default = '')
+    poi_id = CharField(max_length = 40, default = '')
     image_url = TextField(default = '')
 
 # Only create the tables if they do not exist
