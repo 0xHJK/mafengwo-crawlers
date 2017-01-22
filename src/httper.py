@@ -97,7 +97,7 @@ class Httper(object):
             if rk:
                 txt = txt[rk]
         # 如果请求成功了
-        if _:
+        if _ and (txt != ''):
             # 如果是用正则模式
             if dtype == 're' and rex != '':
                 return True, re.findall(rex, txt)
