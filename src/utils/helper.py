@@ -23,12 +23,14 @@ def save_failed_url(**kwargs):
     url = kwargs.get('url', '')
     method = kwargs.get('method', '')
     data = kwargs.get('data', '')
+    rtype = kwargs.get('rtype', '')
+    rkey = kwargs.get('rkey', '')
     dtype = kwargs.get('dtype', '')
     rex = kwargs.get('rex', '')
     selector = kwargs.get('selector', '')
     attr = kwargs.get('attr', '')
     conn = sqlite3.connect('url.db')
-    conn.excute(
+    conn.execute(
         '''create table if not exists urls (
             id          integer     primary key,
             url         text,
@@ -43,7 +45,7 @@ def save_failed_url(**kwargs):
         );'''
     )
     cur = conn.cursor()
-    cur.excute('insert (url, method, data, rtype, rkey, dtype, rex, selector, attr) into urls values (?, ?, ?, ?, ?, ?, ?, ?, ?)', (url, method, data, rtype, rkey, dtype, rex, selector, attr))
+    cur.execute('insert (url, method, data, rtype, rkey, dtype, rex, selector, attr) into urls values (?, ?, ?, ?, ?, ?, ?, ?, ?)', (url, method, data, rtype, rkey, dtype, rex, selector, attr))
     cur.commit()
     cur.close()
     conn.close()
