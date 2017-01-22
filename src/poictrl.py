@@ -68,6 +68,9 @@ class PoiCtrl(object):
                     dest_id = self.dest_id
                 )
 
+    def read_poi_list(self):
+        return Poi.select(Poi.poi_id, Poi.m_poi_id).where(Poi.description == '')
+
     def poi_list(self):
         while self.page <= self.total:
             echo.info('mddid: %s, uuid: %s, page: %s, total: %s' % (self.m_dest_id, self.dest_id, self.page, self.total))
