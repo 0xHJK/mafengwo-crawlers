@@ -41,6 +41,9 @@ class MainDestCtrl(object):
         # select province which has not completed
         return Dest.select(Dest.dest_id, Dest.province, Dest.m_dest_id).where((Dest.province == Dest.name) & (Dest.is_dest_over == False))
 
+    def read_area_dest_list(self):
+        return Dest.select(Dest.dest_id, Dest.m_dest_id).where((Dest.province != Dest.name) & (Dest.is_poi_over == False))
+
     def dest_list(self):
         hr = Httper(
             self.url,
