@@ -78,11 +78,17 @@ class Httper(object):
             return False, ''
         echo.success('Get %s successfully' % self.url)
         if self.rtype == 'text':
-            self.result = True, r.text
-            return True, r.text
+            try:
+                self.result = True, r.text
+                return True, r.text
+            except:
+                self.request_failed()
         elif self.rtype == 'json':
-            self.result = True, r.json()
-            return True, r.json()
+            try:
+                self.result = True, r.json()
+                return True, r.json()
+            except:
+                self.request_failed()
 
     '''get data'''
     def get_data(self, **kwargs):
@@ -95,7 +101,17 @@ class Httper(object):
         # 支持多级json数据
         for rk in rkey:
             if rk:
-                txt = txt[rk]
+                try:
+                    txt = txt[rk]
+                except:
+                    self.request_failed()
+                    return self.get_data(
+                            dtype = dtype,
+                            rex = rex,
+                            selector = selector,
+                            attr = attr,
+                            rkey = rkey
+                        )
         # 如果请求成功了
         if _ and (txt != ''):
             # 如果是用正则模式
