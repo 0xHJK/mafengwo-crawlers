@@ -28,7 +28,7 @@ class Poi(BaseModel):
     description = TextField(default = '')
     poi_address = TextField(default = '')
     guidebook = TextField(default = '')
-    tel = CharField(max_length = 20, default = '')
+    tel = CharField(max_length = 255, default = '')
     website = CharField(default = '')
     expected_time = TextField(default = '')
     traffic = TextField(default = '')
@@ -42,6 +42,7 @@ class Poi(BaseModel):
     sub_poi_id = TextField(default = '')
     dest_id = CharField(max_length = 40, default = '')
     m_poi_id = IntegerField(default = 0)
+    is_over = BooleanField(default = False)
 
 
 class Pimg(BaseModel):
