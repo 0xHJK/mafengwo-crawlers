@@ -51,12 +51,12 @@ class PortalCtrl(object):
                     province = name
                     city = ''
                     # push portal id
-                    # push_portal_id(m_dest_id)
+                    push_portal_id(m_dest_id)
                 else:
                     province = ''
                     city = name
                     # push city id
-                    # push_city_id(m_dest_id)
+                    push_city_id(m_dest_id)
                 # save to database
                 Dest.create(
                     dest_id = uuid.uuid4(),

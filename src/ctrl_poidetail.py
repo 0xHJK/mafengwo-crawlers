@@ -4,7 +4,7 @@
 import uuid
 import re
 from common.pyecho import echo
-from common.models import Poi
+from common.models import Poi, Pimg
 from common.httper import Httper
 from common.cache import push_image_url
 
