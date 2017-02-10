@@ -10,17 +10,20 @@ services:
     volumes:
       - dbdata:/var/lib/mysql
     restart: always
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --init-connect='SET NAMES utf8mb4;' --innodb-flush-log-at-trx-commit=0
     environment:
       MYSQL_ROOT_PASSWORD: ayou
       MYSQL_DATABASE: ayou
       MYSQL_USER: ayou
       MYSQL_PASSWORD: ayou
+    ports:
+      - '3306:3306'
 
   portal:
     build: .
     volumes:
       - .:/lambda
-    command: python3 /lambda/portal/main.py
+    command: python3 /lambda/src/main_portal.py
     links:
       - cache
       - db
@@ -32,7 +35,7 @@ services:
     build: .
     volumes:
       - .:/lambda
-    command: python3 /lambda/citylist/main.py
+    command: python3 /lambda/src/main_citylist.py
     links:
       - cache
       - db
@@ -44,7 +47,7 @@ services:
     build: .
     volumes:
       - .:/lambda
-    command: python3 /lambda/poilist/main.py
+    command: python3 /lambda/src/main_poilist.py
     links:
       - cache
       - db
@@ -56,7 +59,7 @@ services:
     build: .
     volumes:
       - .:/lambda
-    command: python3 /lambda/poidetail/main.py
+    command: python3 /lambda/src/main_poidetail.py
     links:
       - cache
       - db
