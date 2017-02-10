@@ -1,0 +1,69 @@
+version: '2'
+services:
+  cache:
+    image: redis
+    ports:
+      - '6379:6379'
+
+  db:
+    image: mysql:5.7
+    volumes:
+      - dbdata:/var/lib/mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ayou
+      MYSQL_DATABASE: ayou
+      MYSQL_USER: ayou
+      MYSQL_PASSWORD: ayou
+
+  portal:
+    build: .
+    volumes:
+      - .:/lambda
+    command: python3 /lambda/portal/main.py
+    links:
+      - cache
+      - db
+    depends_on:
+      - cache
+      - db
+
+  citylist:
+    build: .
+    volumes:
+      - .:/lambda
+    command: python3 /lambda/citylist/main.py
+    links:
+      - cache
+      - db
+    depends_on:
+      - cache
+      - db
+
+  poilist:
+    build: .
+    volumes:
+      - .:/lambda
+    command: python3 /lambda/poilist/main.py
+    links:
+      - cache
+      - db
+    depends_on:
+      - cache
+      - db
+
+  poidetail:
+    build: .
+    volumes:
+      - .:/lambda
+    command: python3 /lambda/poidetail/main.py
+    links:
+      - cache
+      - db
+    depends_on:
+      - cache
+      - db
+
+volumes:
+  dbdata:
+
