@@ -3,7 +3,7 @@
 
 from peewee import *
 
-db = MySQLDatabase('ayou', user = 'root', password = 'root', charset = 'utf8mb4')
+db = MySQLDatabase('ayou', host = 'db', user = 'ayou', password = 'ayou', charset = 'utf8mb4')
 db.connect()
 
 class BaseModel(Model):
@@ -17,17 +17,18 @@ class Dest(BaseModel):
     province = CharField(max_length = 48, default = '')
     country = CharField(max_length = 48, default = '中国')
     parent_dest_id = CharField(max_length = 40, default = '')
+    m_parent_dest_id = IntegerField(default = 0)
     m_dest_id = IntegerField(default = 0)
-    is_dest_over = BooleanField(default = False)
-    is_poi_over = BooleanField(default = False)
+    # is_dest_over = BooleanField(default = False)
+    # is_poi_over = BooleanField(default = False)
 
 
 class Poi(BaseModel):
     poi_id = UUIDField(primary_key = True)
     name = CharField(max_length = 48, default = '')
-    description = TextField(default = '')
-    poi_address = TextField(default = '')
-    guidebook = TextField(default = '')
+    summary = TextField(default = '')
+    # poi_address = TextField(default = '')
+    # guidebook = TextField(default = '')
     tel = CharField(max_length = 255, default = '')
     website = CharField(default = '')
     expected_time = TextField(default = '')
@@ -35,14 +36,14 @@ class Poi(BaseModel):
     ticket = TextField(default = '')
     business_hours = TextField(default = '')
     comment_count = IntegerField(default = 0)
-    comment_count_a = IntegerField(default = 0)
-    comment_count_b = IntegerField(default = 0)
-    comment_count_c = IntegerField(default = 0)
-    parent_poi_id = CharField(max_length = 40, default = '')
+    # comment_count_a = IntegerField(default = 0)
+    # comment_count_b = IntegerField(default = 0)
+    # comment_count_c = IntegerField(default = 0)
+    # parent_poi_id = CharField(max_length = 40, default = '')
     sub_poi_id = TextField(default = '')
     dest_id = CharField(max_length = 40, default = '')
     m_poi_id = IntegerField(default = 0)
-    is_over = BooleanField(default = False)
+    # is_over = BooleanField(default = False)
 
 
 class Pimg(BaseModel):
