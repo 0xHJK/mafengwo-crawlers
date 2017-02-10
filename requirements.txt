@@ -1,0 +1,5 @@
+requests
+peewee
+pymysql
+redis
+pyquery
