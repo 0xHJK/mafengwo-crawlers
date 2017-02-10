@@ -25,7 +25,7 @@ class PoidetailCtrl(object):
         )
         self.poi_name = ''.join(hr.get_data(selector = 'h1', attr = 'text'))
         self.image_url_list = hr.get_data(selector = '.bd img', attr = 'src')
-        self.summary = hr.get_data(selector = '.summary', attr = 'text')
+        self.summary = ''.join(hr.get_data(selector = '.summary', attr = 'text'))
         self.tel = ''.join(hr.get_data(selector = '.tel .content', attr = 'text'))
         self.website = ''.join(hr.get_data(selector = '.item-site .content a', attr = 'href'))
         self.expected_time = ''.join(hr.get_data(
