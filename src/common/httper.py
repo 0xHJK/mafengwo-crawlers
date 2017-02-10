@@ -5,15 +5,16 @@ import re
 import requests
 from pyquery import PyQuery as pq
 
-from utils.pyecho import echo
-from utils.helper import get_proxies, get_headers, save_failed_url
+from .pyecho import echo
+from .chameleon import chameleon
+from .cache import mq_push
 
 class Httper(object):
     """docstring for Httper"""
     def __init__(self, *args, **kwargs):
         super(Httper, self).__init__()
         # if request failed, retry 10 times
-        self.retry_time = 10
+        self.remaining_retries = 20
         self.url = args[0] or kwargs.get('url', '')
         self.method = kwargs.get('method', 'get')
         self.data = kwargs.get('data', {})
@@ -27,26 +28,23 @@ class Httper(object):
         self.selector = kwargs.get('selector', '')
         self.attr = kwargs.get('attr', '')
         # request timeout, default timeout is 10s
-        self.timeout = kwargs.get('timeout', 10)
+        self.timeout = kwargs.get('timeout', 7)
+        # 用来处理出错情况
+        self.cache_key = kwargs.get('cache_key', 'mafengwo:default')
+        self.cache_val = kwargs.get('cache_val', '1234')
+
+        self.request()
 
     '''save failed request'''
     def request_failed(self):
         # if request failed, retry
-        if self.retry_time > 0:
+        echo.error('Get %s failed' % self.url)
+        echo.info('Remaining retries: %d' % self.remaining_retries)
+        if self.remaining_retries > 0:
+            self.remaining_retries -= 1
             self.request()
-            self.retry_time -= 1
         else:
-            save_failed_url(
-                url = self.url,
-                method = self.method,
-                data = str(self.data),
-                rtype = self.rtype,
-                rkey = str(self.rkey),
-                dtype = self.dtype,
-                rex = self.rex,
-                selector = self.selector,
-                attr = self.attr
-            )
+            mq_push(self.cache_key, self.cache_val)
 
     '''request'''
     def request(self):
@@ -56,39 +54,31 @@ class Httper(object):
                 r = requests.get(
                     self.url,
                     data = self.data,
-                    headers = get_headers(),
-                    proxies = get_proxies(),
+                    headers = chameleon.get_headers(),
+                    proxies = chameleon.get_proxies(),
                     timeout = self.timeout
                 )
             elif self.method == 'post' or self.method == 'POST':
                 r = requests.post(
                     self.url,
                     data = self.data,
-                    headers = get_headers(),
-                    proxies = get_proxies(),
+                    headers = chameleon.get_headers(),
+                    proxies = chameleon.get_proxies(),
                     timeout = self.timeout
                 )
         except:
-            echo.error('Get %s failed' % self.url)
-            self.request_failed()
-            return False, ''
-        if r.status_code != 200:
-            echo.error('%d %s' % (r.status_code, self.url))
-            self.request_failed()
-            return False, ''
-        echo.success('Get %s successfully' % self.url)
+            return self.request_failed()
+        # 如果状态不为200或数据为空或长度小于10
+        if r.status_code != 200 or r.text is None or len(r.text) < 10:
+            return self.request_failed()
         if self.rtype == 'text':
-            try:
-                self.result = True, r.text
-                return True, r.text
-            except:
-                self.request_failed()
+            self.result = r.text
         elif self.rtype == 'json':
             try:
-                self.result = True, r.json()
-                return True, r.json()
+                self.result = r.json()
             except:
-                self.request_failed()
+                return self.request_failed()
+        echo.success('Get %s successfully' % self.url)
 
     '''get data'''
     def get_data(self, **kwargs):
@@ -97,8 +87,9 @@ class Httper(object):
         selector = kwargs.get('selector', self.selector)
         attr = kwargs.get('attr', self.attr)
         rkey = kwargs.get('rkey', self.rkey)
-        _, txt = self.result
-        # 支持多级json数据
+        txt = self.result
+
+        # 支持从多级json中提取数据
         for rk in rkey:
             if rk:
                 try:
@@ -112,22 +103,26 @@ class Httper(object):
                             attr = attr,
                             rkey = rkey
                         )
-        # 如果请求成功了
-        if _ and (txt != ''):
-            # 如果是用正则模式
-            if dtype == 're' and rex != '':
-                return True, re.findall(rex, txt)
-            # 如果是用选择器模式
-            elif dtype == 'pq' and selector != '' and attr != '':
+
+        # 如果是用正则模式
+        if dtype == 're' and rex != '':
+            return re.findall(rex, txt)
+        # 如果是用选择器模式
+        elif dtype == 'pq' and selector != '' and attr != '':
+            try:
                 d = pq(txt)
-                elements = d(selector)
-                # 如果选中的不是一个list，先变成list
-                if not isinstance(elements, list):
-                    elements = [elements]
-                # 如果attr是text
-                if attr == 'text' or attr == 'txt':
-                    res = [d(x).text() for x in elements]
-                else:
-                    res = [d(x).attr(attr) for x in elements]
-                return True, res
-        return False, []
+            except:
+                return self.request_failed()
+            elements = d(selector)
+            # 如果选中的不是一个list，先变成list
+            if not isinstance(elements, list):
+                elements = [elements]
+            # 如果attr是text
+            if attr == 'text' or attr == 'txt':
+                res = [d(x).text() for x in elements]
+            else:
+                res = [d(x).attr(attr) for x in elements]
+            return res
+
+        echo.error('are you kidding me?')
+        return ['']
